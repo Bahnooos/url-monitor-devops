@@ -1,6 +1,8 @@
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+
 import httpx
+
 from app.database import SessionLocal
 from app.models import MonitorJob
 from app.worker import celery_app
@@ -30,7 +32,7 @@ def check_url_task(job_id: str):
             job.response_time_ms = elapsed_ms
             job.error_message = str(exc)
 
-        job.completed_at = datetime.now(timezone.utc)
+        job.completed_at = datetime.now(UTC)
         db.commit()
         return {"job_id": job.id, "status": job.status}
     finally:
@@ -66,7 +68,7 @@ def cleanup_old_jobs():
     """مسح السجلات اللي مر عليها أكتر من 7 أيام"""
     db = SessionLocal()
     try:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+        cutoff = datetime.now(UTC) - timedelta(days=7)
         deleted = db.query(MonitorJob).filter(MonitorJob.created_at < cutoff).delete()
         db.commit()
         return {"deleted_records": deleted}

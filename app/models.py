@@ -1,6 +1,8 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from sqlalchemy import Column, DateTime, Float, Integer, String, Text
+
 from app.database import Base
 
 
@@ -13,5 +15,5 @@ class MonitorJob(Base):
     http_status_code = Column(Integer, nullable=True)
     response_time_ms = Column(Float, nullable=True)
     error_message = Column(Text, nullable=True)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     completed_at = Column(DateTime(timezone=True), nullable=True)

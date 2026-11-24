@@ -1,10 +1,10 @@
+import redis
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, HttpUrl
 from sqlalchemy import desc, text
 from sqlalchemy.orm import Session
-import redis
 
 from app.config import settings
 from app.database import get_db
@@ -111,7 +111,7 @@ def health_check(db: Session = Depends(get_db)):
         r.ping()
         return {"status": "healthy", "database": "up", "redis": "up"}
     except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Dependency unhealthy: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Dependency unhealthy: {e!s}") from e
 
 
 @app.get("/jobs")
