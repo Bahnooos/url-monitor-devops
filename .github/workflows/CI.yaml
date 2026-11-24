@@ -11,7 +11,7 @@ on:
 jobs:
   lint-and-test:
     name: Lint and Integration Test
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
