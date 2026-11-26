@@ -19,8 +19,10 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH"
-
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+RUN apt-get update && \
+    apt-get upgrade -y --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -r appgroup && useradd -r -g appgroup appuser
 
 # 1. Layer المكتبات (بتتعملها Cache ومبتتغيرش غير لو requirements.txt اتعدلت)
 COPY --from=builder /opt/venv /opt/venv
