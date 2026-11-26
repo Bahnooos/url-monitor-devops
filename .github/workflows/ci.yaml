@@ -2,7 +2,7 @@ name: CI Lints, Test & Build a Single Image
 
 on:
   push:
-    branches: 
+    branches:
       - main
   pull_request:
 
@@ -14,6 +14,8 @@ jobs:
   lint-and-test:
     name: Lint and Integration Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout Code
@@ -32,18 +34,16 @@ jobs:
           pip install pytest ruff
 
       - name: Run Ruff Linter
-        run:  ruff check app/ tests/ --fix
+        run: ruff check app/ tests/
 
       - name: Run pytest
-        run:  pytest -v
+        run: pytest -v
 
   build-and-scan:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
     needs: lint-and-test
 
     steps:
@@ -54,10 +54,10 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login Github Container Registry
-        if: github.event_name  != 'pull_request'
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6
         with:
-          registry: ${{ env.REGISTRY }}  
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -65,11 +65,11 @@ jobs:
         id: meta
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81
         with:
-          images: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}  
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,format=short
-                
+
       - name: Build Image for scanning
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
@@ -85,7 +85,7 @@ jobs:
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           image-ref: url-monitor-app:scan
-          severity: HIGH,CRITICA
+          severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
 
